@@ -203,11 +203,45 @@ header .en{font-size:10px;letter-spacing:.26em}.sigil{margin:7px 0 0}
 @media(max-width:375px){.merchant-scene .spread{left:2%;right:2%;column-gap:5px;row-gap:14px}.merchant-scene[data-count="5"]{height:calc(var(--portrait) + 380px)}.merchant-scene .position{font-size:10px!important}.merchant-scene .card3d{aspect-ratio:2/3}}
 @media(min-width:720px){main{max-width:650px}.merchant-scene{margin:auto}}
 
+
+/* MOBILE V2 — a single continuous tabletop, and dealt cards nearer the merchant. */
+.merchant-scene{
+  background:linear-gradient(180deg,#21121a 0%,#321a25 64%,#25121d 100%);
+  height:var(--portrait);
+  border-radius:12px;
+  border-color:#a16e4688;
+}
+/* Reserve only the height genuinely needed by the actual dealt cards. */
+.merchant-scene[data-count="1"]{height:calc(var(--portrait) + 125px)}
+.merchant-scene[data-count="3"]{height:calc(var(--portrait) + 92px)}
+.merchant-scene[data-count="5"]{height:calc(var(--portrait) + 275px)}
+/* Replace the fake semicircle/boxed-on extension with a transparent blended velvet surface. */
+.merchant-scene::before{
+  top:calc(var(--portrait) - 97px);
+  background:
+    linear-gradient(180deg,transparent 0%,#321b27b0 23%,#331b28e8 42%,#26121fcf 78%,#1b101b 100%),
+    radial-gradient(ellipse 110% 75% at 50% 5%,#823b4960,transparent 72%);
+}
+/* The bottom border belongs to the whole tabletop, not a separate lower panel. */
+.merchant-scene .spread{
+  top:calc(var(--portrait) * .68);
+  bottom:auto;
+  row-gap:14px;
+  column-gap:7px;
+}
+.merchant-scene[data-count="5"] .spread{top:calc(var(--portrait) * .70)}
+@media(max-width:375px){
+  .merchant-scene[data-count="1"]{height:calc(var(--portrait) + 125px)}
+  .merchant-scene[data-count="3"]{height:calc(var(--portrait) + 96px)}
+  .merchant-scene[data-count="5"]{height:calc(var(--portrait) + 268px)}
+  .merchant-scene .spread{row-gap:12px}
+}
+
 </style>
 </head>
 <body>
 <main>
-<div class="topline"><div class="brandmark"><span>✧</span> THE MERCHANT OF FATE</div><div class="ver">ARCANA · 22 | MOBILE EDITION V1</div></div>
+<div class="topline"><div class="brandmark"><span>✧</span> THE MERCHANT OF FATE</div><div class="ver">ARCANA · 22 | MOBILE EDITION V2</div></div>
 <header><div class="eyebrow">FORTUNE IS CALLING</div><h1>命運之扉</h1><div class="en">THE DOOR OF DESTINY</div><div class="sigil">✦ ☽ ✧</div></header>
 <section class="stage" aria-label="占卜儀式">
 <div id="merchantScene" class="merchant-scene" aria-label="女占卜師在桌前親手洗牌、抽牌並發牌的動態場景">
