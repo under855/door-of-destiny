@@ -2,7 +2,7 @@
 <html lang="zh-Hant">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>命運之扉｜易經占卜・圖片整合測試版 V2</title>
+<title>命運之扉｜易經占卜・圖片整合測試版 V2.1</title>
 <style>
 :root{--bg:#140c0b;--panel:#241513;--gold:#e8c27b;--soft:#b89664;--line:#704d36;--text:#f7ead7;--muted:#d0b193;--red:#6d191b;}
 *{box-sizing:border-box}html,body{margin:0;background:radial-gradient(circle at top,#2a1816 0,#140c0b 45%,#0f0909 100%);color:var(--text);font-family:system-ui,"Noto Sans TC",sans-serif}
@@ -22,7 +22,10 @@ body{min-height:100dvh;padding:18px 12px 28px;display:flex;flex-direction:column
 @keyframes coinFlip{0%{opacity:0;transform:translateY(-85px) rotateY(0deg) rotateX(35deg) scale(.65)}65%{opacity:1;transform:translateY(5px) rotateY(560deg) rotateX(10deg) scale(1.04)}100%{opacity:1;transform:translateY(0) rotateY(720deg) rotateX(0) scale(1)}}@keyframes coinPop{0%{opacity:0;transform:translateY(-70px) scale(.6)}100%{opacity:1;transform:translateY(0) scale(1)}}
 .shell-zone{position:absolute;left:35.2%;top:80.4%;width:29.6%;height:6.7%;pointer-events:none;z-index:2}
 .shaker{position:absolute;inset:0;opacity:0;border-radius:50% / 60%;background-repeat:no-repeat;filter:drop-shadow(0 2px 2px #120806)}
-.shaking .shaker{opacity:1;animation:shellShake .42s ease-in-out infinite}
+/* V2.1: avoid moving photographic crop across hands */
+.shaking .shaker{opacity:0;animation:none}
+.shaking .bg{animation:ritualGlow .8s ease-in-out infinite alternate}
+@keyframes ritualGlow{from{filter:brightness(1)}to{filter:brightness(1.045)}}
 @keyframes shellShake{0%,100%{transform:translateY(0) rotate(0deg)}25%{transform:translateY(-3px) rotate(3deg)}50%{transform:translateY(0) rotate(0deg)}75%{transform:translateY(2px) rotate(-3deg)}}
 .panel{width:min(100%,430px);background:linear-gradient(180deg,rgba(40,19,17,.92),rgba(22,11,11,.96));border:1px solid var(--line);border-radius:16px;padding:14px 14px 16px;box-shadow:0 10px 30px rgba(0,0,0,.25)}
 .btns{display:flex;gap:10px}button{flex:1;padding:13px 10px;border-radius:12px;border:1px solid #9c7850;background:#311918;color:var(--text);font:inherit;font-size:15px;letter-spacing:.08em;cursor:pointer}button.primary{background:linear-gradient(180deg,#7b2a28,#4a1719);border-color:#b98562}button:disabled{opacity:.42;cursor:not-allowed}
