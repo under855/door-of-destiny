@@ -214,7 +214,7 @@ header .en{font-size:10px;letter-spacing:.26em}.sigil{margin:7px 0 0}
 /* Reserve only the height genuinely needed by the actual dealt cards. */
 .merchant-scene[data-count="1"]{height:calc(var(--portrait) + 125px)}
 .merchant-scene[data-count="3"]{height:calc(var(--portrait) + 92px)}
-.merchant-scene[data-count="5"]{height:calc(var(--portrait) + 275px)}
+.merchant-scene[data-count="5"]{height:calc(var(--portrait) + 380px)}
 /* Replace the fake semicircle/boxed-on extension with a transparent blended velvet surface. */
 .merchant-scene::before{
   top:calc(var(--portrait) - 97px);
@@ -229,19 +229,29 @@ header .en{font-size:10px;letter-spacing:.26em}.sigil{margin:7px 0 0}
   row-gap:14px;
   column-gap:7px;
 }
-.merchant-scene[data-count="5"] .spread{top:calc(var(--portrait) * .70)}
+.merchant-scene[data-count="5"] .spread{top:calc(var(--portrait) * .665)}
 @media(max-width:375px){
   .merchant-scene[data-count="1"]{height:calc(var(--portrait) + 125px)}
   .merchant-scene[data-count="3"]{height:calc(var(--portrait) + 96px)}
-  .merchant-scene[data-count="5"]{height:calc(var(--portrait) + 268px)}
+  .merchant-scene[data-count="5"]{height:calc(var(--portrait) + 350px)}
+  .merchant-scene[data-count="5"] .spread{top:calc(var(--portrait) * .655)}
   .merchant-scene .spread{row-gap:12px}
 }
 
+
+/* MOBILE V3 — clearer reading text and more breathing room for five-card layout. */
+.merchant-scene[data-count="5"] .slot{max-width:108px}
+.merchant-scene[data-count="5"] .position{margin-top:8px!important}
+.reading .omen,.reading .plain,.reading .advice{margin:0 0 12px;line-height:1.95}
+.reading .lead{display:block;color:#ffdfad;font-size:13px;letter-spacing:.08em;margin-bottom:4px;font-family:Cinzel,serif}
+.reading .omen{color:#f1e6f4}.reading .plain{color:#eadfdf}.reading .advice{color:#f4e5c0}.reading .advice:last-child{margin-bottom:0}
+.reading.conclusion .lead{color:#ffd79c}
+@media(max-width:550px){.reading{padding:18px 16px}.reading h3{font-size:18px;line-height:1.45}.reading .lead{font-size:12px}.reading .omen,.reading .plain,.reading .advice{font-size:14px;line-height:1.92}}
 </style>
 </head>
 <body>
 <main>
-<div class="topline"><div class="brandmark"><span>✧</span> THE MERCHANT OF FATE</div><div class="ver">ARCANA · 22 | MOBILE EDITION V2</div></div>
+<div class="topline"><div class="brandmark"><span>✧</span> THE MERCHANT OF FATE</div><div class="ver">ARCANA · 22 | MOBILE EDITION V3</div></div>
 <header><div class="eyebrow">FORTUNE IS CALLING</div><h1>命運之扉</h1><div class="en">THE DOOR OF DESTINY</div><div class="sigil">✦ ☽ ✧</div></header>
 <section class="stage" aria-label="占卜儀式">
 <div id="merchantScene" class="merchant-scene" aria-label="女占卜師在桌前親手洗牌、抽牌並發牌的動態場景">
@@ -377,11 +387,43 @@ for(let i=0;i<elements.length;i++){
 if(!isLive(token))return;setMessage('開始解析眼前的命運。','看見的不是定局，而是值得思索的可能。');$('sceneLabel').textContent='THE REVELATION';show(readings,true);await sleep(reduced?80:460);
 for(let i=0;i<picks.length;i++){
  if(!isLive(token))return;
- const card=picks[i],section=document.createElement('article');section.className='reading';const label=document.createElement('div');label.className='label';label.textContent=`第 ${i+1} 張 · ${positions[count][i]}`;const h=document.createElement('h3');h.textContent=`${card.name}｜${card.reversed?'逆位':'正位'}`;const p=document.createElement('p');p.textContent=card.reversed?card.rText:card.uText;section.append(label,h,p);readings.appendChild(section);await sleep(reduced?80:700)
+ const card=picks[i],positionLabel=positions[count][i],section=document.createElement('article');section.className='reading';const label=document.createElement('div');label.className='label';label.textContent=`第 ${i+1} 張 · ${positionLabel}`;const h=document.createElement('h3');h.textContent=`${card.name}｜${card.reversed?'逆位':'正位'}`;const info=explainCard(card,positionLabel,count);const omen=document.createElement('p');omen.className='omen';omen.innerHTML=`<span class="lead">命運低語</span>${info.tone}`;const plain=document.createElement('p');plain.className='plain';plain.innerHTML=`<span class="lead">清楚解讀</span>${info.plain}`;const advice=document.createElement('p');advice.className='advice';advice.innerHTML=`<span class="lead">行動提醒</span>${info.advice}`;section.append(label,h,omen,plain,advice);readings.appendChild(section);await sleep(reduced?80:700)
 }
-if(!isLive(token))return;const section=document.createElement('article');section.className='reading conclusion';const h=document.createElement('h3');h.textContent='✧ 命運的最終低語';const p=document.createElement('p');p.textContent=conclude(picks);section.append(h,p);readings.appendChild(section);phase='finished';show(restartWrap,true);
+if(!isLive(token))return;const section=document.createElement('article');section.className='reading conclusion';const h=document.createElement('h3');h.textContent='✧ 命運的最終低語';const closing=conclude(picks);const omen=document.createElement('p');omen.className='omen';omen.innerHTML=`<span class="lead">整體命運</span>${closing.intro}`;const plain=document.createElement('p');plain.className='plain';plain.innerHTML=`<span class="lead">關鍵提醒</span>${closing.clear}`;const advice=document.createElement('p');advice.className='advice';advice.innerHTML=`<span class="lead">下一步</span>${closing.advice}`;section.append(h,omen,plain,advice);readings.appendChild(section);phase='finished';show(restartWrap,true);
 } 
-function conclude(cards){const plus=cards.filter(x=>!x.reversed).length;const end=cards[cards.length-1];const focus=cards[0];const intro=plus>cards.length/2?'星光較多地照亮了眼前的道路，但光明並不代表一切都會自動成真。':plus<cards.length/2?'此刻的牌面提醒你：與其急著得到肯定，不如先辨識那些尚未釐清的結。':'光與影在這次占卜中相互交織，答案未必只有一個方向。';const tail=count===1?'這張牌只是此刻的一面鏡子，不必把它當成不可更改的預言。':`從「${focus.name}」延伸到「${end.name}」，每一張牌都像一段尚未寫完的故事。`;const ending=count===5?'請先釐清問題的核心，再評估阻礙與你真正的感受；最後把建議化成一件可以採取的小行動。':count===3?'過去塑造了現在，但未來仍取決於你接下來的選擇。':'把這則訊息帶回日常，觀察它是否能幫助你看清自己的想法。';return `${intro}${tail}${ending} 命運不替你做決定；握住選擇的人，始終是你。`}
+function detailForPosition(label,count,card){
+  const map={
+    '此刻的指引':'這張牌像一盞暫時照亮前路的燈，重點在你現在最需要看清的方向。',
+    '過去的影響':'這張牌說明過去哪一股力量仍在影響你現在的判斷與情緒。',
+    '現在的處境':'這張牌直接指出你此刻正在面對的局面，以及你目前最真實的狀態。',
+    '未來的可能':'若你延續現在的節奏，這張牌描繪的是接下來最可能浮現的走向。',
+    '問題核心':'這張牌揭開事情最核心的根結，提醒你別被表面現象帶偏。',
+    '目前阻礙':'這張牌指出真正卡住你的點，可能是外在局勢，也可能是內在遲疑。',
+    '內在狀態':'這張牌照見你內心深處的情緒與信念，它往往比表面表現更真。',
+    '後續發展':'這張牌展示局勢如何繼續演變，讓你提早看見下一段波動。',
+    '命運的建議':'這張牌不是空泛安慰，而是命運此刻最想提醒你的行動方向。'
+  };
+  return map[label]||'這張牌正揭露你此刻最需要理解的一層訊息。';
+}
+function explainCard(card,label,count){
+  const essence = card.reversed ? card.reversed : card.upright;
+  const base = card.reversed ? card.rText : card.uText;
+  const tone = card.reversed
+    ? `在逆位中，「${card.name}」像一面微微碎裂的鏡子，提醒你別只看表面平靜，而要留意被壓住的不安與遲疑。`
+    : `在正位中，「${card.name}」帶著清晰的象徵降臨，像命運親手點亮一枚記號，要你正視眼前正在成形的課題。`;
+  const plain = `${detailForPosition(label,count,card)} 這張牌的關鍵詞是「${essence}」。簡單說，它在告訴你：${base}`;
+  let advice='先不要急著把答案當成結論，請把這張牌當成下一步的座標。';
+  if(label==='問題核心') advice='行動提醒：先把真正的核心問題說出來，再處理旁枝末節，否則你會一直在外圍繞圈。';
+  else if(label==='目前阻礙') advice='行動提醒：別只怪局勢不順，先找出自己最常卡住的那一步，問題就會開始鬆動。';
+  else if(label==='內在狀態') advice='行動提醒：承認你現在真正的感受，比假裝沒事更能幫你做出正確選擇。';
+  else if(label==='後續發展') advice='行動提醒：把它當成趨勢而非判決，只要你調整做法，後續發展也會跟著改變。';
+  else if(label==='命運的建議'||label==='此刻的指引') advice='行動提醒：把這張牌化成一個今天就能做到的小動作，命運的訊息才會真正落地。';
+  else if(label==='過去的影響') advice='行動提醒：理解過去留下的痕跡，是為了不讓舊模式繼續支配現在。';
+  else if(label==='現在的處境') advice='行動提醒：先如實面對現況，再決定下一步；清楚，永遠比逞強有力量。';
+  else if(label==='未來的可能') advice='行動提醒：這是未來的傾向，不是無法更改的預言；你現在的選擇，仍會改寫它。';
+  return {tone,plain,advice};
+}
+function conclude(cards){const plus=cards.filter(x=>!x.reversed).length;const end=cards[cards.length-1];const focus=cards[0];const intro=plus>cards.length/2?'較多正位牌落下，代表局勢並非沒有助力；命運正在給你一條能夠前進的路，但仍需要你主動回應。':plus<cards.length/2?'逆位牌較多，表示你此刻最需要的不是硬撐，而是先釐清混亂、收拾情緒，再重新整隊。':'光與影在這次占卜中勢均力敵，命運沒有替你下判決，而是要你看見選擇本身的重量。';const clear=count===1?`「${focus.name}」是這次唯一的核心訊息。它像一面鏡子，讓你看見此刻最需要理解的課題。`:count===3?`從「${focus.name}」到「${end.name}」，牌面清楚說明：過去仍在影響現在，而未來會隨你接下來的選擇轉向。`:`這組五張牌已經把脈絡攤開：先看核心，再辨識阻礙，接著理解自己的內在狀態，如此你才能真正掌握後續發展。`;const advice=count===5?'把最刺眼的那一張牌當成今天的重點，先修正一件最卡的事，整體局勢就會開始改變。':count===3?'請把未來那張牌當成提醒，而不是命令；只要調整現在的步伐，未來就會跟著改寫。':'不要急著尋求第二個答案，先把這張牌的訊息落實在今天的行動裡。';return {intro,clear,advice:`${advice} 命運不替你做決定；真正握住方向的人，始終是你。`}}
 function restart(){++epoch;clearSceneMotion();phase='choose';count=0;scene.removeAttribute('data-count');picks=[];deck.classList.remove('shuffling','draw-focus','fade-deck','vanished');setFrame(0);show(choices,true);show(ritual,false);show(bar,false);show(spread,false);show(readings,false);show(restartWrap,false);spread.replaceChildren();readings.replaceChildren();$('sceneLabel').textContent='THE VEIL OF FATE';setMessage('命運的帷幕已然升起。<br>你願意看見什麼？','請選擇此次占卜的牌數。');window.scrollTo({top:0,behavior:reduced?'instant':'smooth'})}
 FRAMES.slice(0,5).forEach(src=>{const im=new Image(); im.src=src;});
 setFrame(0);
