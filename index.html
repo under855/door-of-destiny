@@ -247,11 +247,20 @@ header .en{font-size:10px;letter-spacing:.26em}.sigil{margin:7px 0 0}
 .reading .omen{color:#f1e6f4}.reading .plain{color:#eadfdf}.reading .advice{color:#f4e5c0}.reading .advice:last-child{margin-bottom:0}
 .reading.conclusion .lead{color:#ffd79c}
 @media(max-width:550px){.reading{padding:18px 16px}.reading h3{font-size:18px;line-height:1.45}.reading .lead{font-size:12px}.reading .omen,.reading .plain,.reading .advice{font-size:14px;line-height:1.92}}
+
+/* MOBILE V4: the cards land on the table, and their labels remain fully visible. */
+.merchant-scene[data-count="1"] .spread{top:calc(var(--portrait) * .595)}
+.merchant-scene[data-count="3"] .spread{top:calc(var(--portrait) * .605)}
+.merchant-scene[data-count="5"] .spread{top:calc(var(--portrait) * .615);row-gap:13px}
+/* Keep the space below the last orientation label rather than cropping it. */
+.merchant-scene[data-count="1"],.merchant-scene[data-count="3"],.merchant-scene[data-count="5"]{min-height:0}
+.merchant-scene .spread{bottom:auto!important}
+.merchant-scene .slot .orientation{padding-bottom:2px}
 </style>
 </head>
 <body>
 <main>
-<div class="topline"><div class="brandmark"><span>✧</span> THE MERCHANT OF FATE</div><div class="ver">ARCANA · 22 | MOBILE EDITION V3</div></div>
+<div class="topline"><div class="brandmark"><span>✧</span> THE MERCHANT OF FATE</div><div class="ver">ARCANA · 22 | MOBILE EDITION V4</div></div>
 <header><div class="eyebrow">FORTUNE IS CALLING</div><h1>命運之扉</h1><div class="en">THE DOOR OF DESTINY</div><div class="sigil">✦ ☽ ✧</div></header>
 <section class="stage" aria-label="占卜儀式">
 <div id="merchantScene" class="merchant-scene" aria-label="女占卜師在桌前親手洗牌、抽牌並發牌的動態場景">
@@ -330,7 +339,7 @@ function setFrame(n){
 }
 function clearSceneMotion(){motionSerial++;if(shuffleTimer!==null){clearInterval(shuffleTimer);shuffleTimer=null;}scene.classList.remove('dealing','shuffling','card-glow');show(autoShuffle,false);}
 async function playFrames(sequence,pace=330){const serial=++motionSerial;for(const f of sequence){if(serial!==motionSerial)return false;setFrame(f);await sleep(reduced?65:pace)}return serial===motionSerial}
-function choose(n){if(phase!=='choose')return;count=n;scene.dataset.count=String(n);phase='ready';scene.classList.remove('shuffling');show(choices,false);show(ritual,true);show(spread,false);deck.classList.remove('vanished');show(autoShuffle,false);setFrame(0);setMessage('在心中默念想問的問題。<br>命運會回應你的疑問。','當你準備好，請讓桌前的占卜師開始洗牌。');$('sceneLabel').textContent='THE RITUAL OF SHUFFLING';button('開始洗牌',startShuffle)}
+function choose(n){if(phase!=='choose')return;scene.style.height='';count=n;scene.dataset.count=String(n);phase='ready';scene.classList.remove('shuffling');show(choices,false);show(ritual,true);show(spread,false);deck.classList.remove('vanished');show(autoShuffle,false);setFrame(0);setMessage('在心中默念想問的問題。<br>命運會回應你的疑問。','當你準備好，請讓桌前的占卜師開始洗牌。');$('sceneLabel').textContent='THE RITUAL OF SHUFFLING';button('開始洗牌',startShuffle)}
 function startShuffle(){if(phase!=='ready')return;phase='shuffling';scene.classList.add('shuffling');
  // The motion deck and the static deck are mutually exclusive: one physical deck only.
  if(frameTween){frameTween.cancel();frameTween=null}
@@ -355,7 +364,23 @@ const o=document.createElement('div');o.className='orientation';o.textContent=''
 slot.append(c,p,o);
 return {slot,c,o}
 }
-async function draw(){if(phase!=='drawReady')return;phase='drawing';const token=++epoch;show(bar,false);show(spread,true);show(readings,false);show(restartWrap,false);readings.replaceChildren();spread.replaceChildren();deck.classList.remove('vanished');scene.classList.add('dealing');const elements=picks.map((card,i)=>{const obj=createCard(card,i);spread.appendChild(obj.slot);return obj});setMessage('她正從桌上的牌堆裡，為你抽出命運。','請看著她的手，牌會直接展現在她的面前。');$('sceneLabel').textContent='THE DEALING OF FATE';setFrame(1);await sleep(reduced?80:320);if(!isLive(token))return;
+function fitSpreadWithinScene(){
+ if(!count || spread.classList.contains('hidden') || !spread.children.length)return;
+ const sceneRect=scene.getBoundingClientRect();
+ let maxBottom=0;
+ for(const slot of spread.children){
+   const rect=slot.getBoundingClientRect();
+   if(rect.height>0)maxBottom=Math.max(maxBottom,rect.bottom-sceneRect.top);
+ }
+ const portrait=sceneRect.width;
+ // Do not compress the altar until the card labels have been measured.
+ const safeHeight=Math.ceil(Math.max(portrait+48,maxBottom+26));
+ if(Number.isFinite(safeHeight) && safeHeight>0){
+   const current=parseFloat(scene.style.height||'0');
+   if(Math.abs(current-safeHeight)>2)scene.style.height=`${safeHeight}px`;
+ }
+}
+async function draw(){if(phase!=='drawReady')return;phase='drawing';const token=++epoch;show(bar,false);show(spread,true);show(readings,false);show(restartWrap,false);readings.replaceChildren();spread.replaceChildren();deck.classList.remove('vanished');scene.classList.add('dealing');const elements=picks.map((card,i)=>{const obj=createCard(card,i);spread.appendChild(obj.slot);return obj});requestAnimationFrame(fitSpreadWithinScene);setMessage('她正從桌上的牌堆裡，為你抽出命運。','請看著她的手，牌會直接展現在她的面前。');$('sceneLabel').textContent='THE DEALING OF FATE';setFrame(1);await sleep(reduced?80:320);if(!isLive(token))return;
 const source=deck.getBoundingClientRect();const sourceX=source.left+source.width*.53,sourceY=source.top+source.height*.42;
 for(let i=0;i<elements.length;i++){
  if(!isLive(token))return;
@@ -382,9 +407,9 @@ for(let i=0;i<elements.length;i++){
 if(!isLive(token))return;deck.classList.add('vanished');setFrame(0);scene.classList.remove('dealing');await sleep(reduced?80:420);
 for(let i=0;i<elements.length;i++){
  if(!isLive(token))return;
- setMessage(`第 ${i+1} 張牌，即將揭曉。`,'命運已在她面前排開，請凝視牌面翻轉。');elements[i].c.classList.add('flipped');elements[i].o.textContent=picks[i].reversed?'逆位':'正位';await sleep(reduced?150:1200);if(!isLive(token))return;elements[i].c.classList.add('settled')
+ setMessage(`第 ${i+1} 張牌，即將揭曉。`,'命運已在她面前排開，請凝視牌面翻轉。');elements[i].c.classList.add('flipped');elements[i].o.textContent=picks[i].reversed?'逆位':'正位';await sleep(reduced?150:1200);if(!isLive(token))return;elements[i].c.classList.add('settled');fitSpreadWithinScene()
 }
-if(!isLive(token))return;setMessage('開始解析眼前的命運。','看見的不是定局，而是值得思索的可能。');$('sceneLabel').textContent='THE REVELATION';show(readings,true);await sleep(reduced?80:460);
+if(!isLive(token))return;fitSpreadWithinScene();setMessage('開始解析眼前的命運。','看見的不是定局，而是值得思索的可能。');$('sceneLabel').textContent='THE REVELATION';show(readings,true);await sleep(reduced?80:460);
 for(let i=0;i<picks.length;i++){
  if(!isLive(token))return;
  const card=picks[i],positionLabel=positions[count][i],section=document.createElement('article');section.className='reading';const label=document.createElement('div');label.className='label';label.textContent=`第 ${i+1} 張 · ${positionLabel}`;const h=document.createElement('h3');h.textContent=`${card.name}｜${card.reversed?'逆位':'正位'}`;const info=explainCard(card,positionLabel,count);const omen=document.createElement('p');omen.className='omen';omen.innerHTML=`<span class="lead">命運低語</span>${info.tone}`;const plain=document.createElement('p');plain.className='plain';plain.innerHTML=`<span class="lead">清楚解讀</span>${info.plain}`;const advice=document.createElement('p');advice.className='advice';advice.innerHTML=`<span class="lead">行動提醒</span>${info.advice}`;section.append(label,h,omen,plain,advice);readings.appendChild(section);await sleep(reduced?80:700)
@@ -424,9 +449,10 @@ function explainCard(card,label,count){
   return {tone,plain,advice};
 }
 function conclude(cards){const plus=cards.filter(x=>!x.reversed).length;const end=cards[cards.length-1];const focus=cards[0];const intro=plus>cards.length/2?'較多正位牌落下，代表局勢並非沒有助力；命運正在給你一條能夠前進的路，但仍需要你主動回應。':plus<cards.length/2?'逆位牌較多，表示你此刻最需要的不是硬撐，而是先釐清混亂、收拾情緒，再重新整隊。':'光與影在這次占卜中勢均力敵，命運沒有替你下判決，而是要你看見選擇本身的重量。';const clear=count===1?`「${focus.name}」是這次唯一的核心訊息。它像一面鏡子，讓你看見此刻最需要理解的課題。`:count===3?`從「${focus.name}」到「${end.name}」，牌面清楚說明：過去仍在影響現在，而未來會隨你接下來的選擇轉向。`:`這組五張牌已經把脈絡攤開：先看核心，再辨識阻礙，接著理解自己的內在狀態，如此你才能真正掌握後續發展。`;const advice=count===5?'把最刺眼的那一張牌當成今天的重點，先修正一件最卡的事，整體局勢就會開始改變。':count===3?'請把未來那張牌當成提醒，而不是命令；只要調整現在的步伐，未來就會跟著改寫。':'不要急著尋求第二個答案，先把這張牌的訊息落實在今天的行動裡。';return {intro,clear,advice:`${advice} 命運不替你做決定；真正握住方向的人，始終是你。`}}
-function restart(){++epoch;clearSceneMotion();phase='choose';count=0;scene.removeAttribute('data-count');picks=[];deck.classList.remove('shuffling','draw-focus','fade-deck','vanished');setFrame(0);show(choices,true);show(ritual,false);show(bar,false);show(spread,false);show(readings,false);show(restartWrap,false);spread.replaceChildren();readings.replaceChildren();$('sceneLabel').textContent='THE VEIL OF FATE';setMessage('命運的帷幕已然升起。<br>你願意看見什麼？','請選擇此次占卜的牌數。');window.scrollTo({top:0,behavior:reduced?'instant':'smooth'})}
+function restart(){++epoch;clearSceneMotion();phase='choose';count=0;scene.style.height='';scene.removeAttribute('data-count');picks=[];deck.classList.remove('shuffling','draw-focus','fade-deck','vanished');setFrame(0);show(choices,true);show(ritual,false);show(bar,false);show(spread,false);show(readings,false);show(restartWrap,false);spread.replaceChildren();readings.replaceChildren();$('sceneLabel').textContent='THE VEIL OF FATE';setMessage('命運的帷幕已然升起。<br>你願意看見什麼？','請選擇此次占卜的牌數。');window.scrollTo({top:0,behavior:reduced?'instant':'smooth'})}
 FRAMES.slice(0,5).forEach(src=>{const im=new Image(); im.src=src;});
 setFrame(0);
+window.addEventListener('resize',()=>{if(spread.children.length)requestAnimationFrame(fitSpreadWithinScene)},{passive:true});
 choices.querySelectorAll('[data-count]').forEach(b=>b.addEventListener('click',()=>choose(Number(b.dataset.count))));$('restart').addEventListener('click',restart);
 </script>
 </body>
